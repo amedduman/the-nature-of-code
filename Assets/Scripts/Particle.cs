@@ -6,6 +6,7 @@ public class Particle : MonoBehaviour
 {
     [SerializeField] Vector3 _gravity = new Vector3(0, -9.8f, 0);
     [SerializeField] Vector3 _wind = new Vector3(1, 0, 0);
+    [SerializeField] [Min(.1f)] float _mass = .1f;
     float _bottomEdgeHeight;
     Vector3 _vel = Vector3.zero;
     Vector3 _acc = Vector3.zero;
@@ -13,13 +14,19 @@ public class Particle : MonoBehaviour
     private void Start()
     {
         _bottomEdgeHeight = -Camera.main.orthographicSize;
+        SetRadius(Mathf.Sqrt(_mass));
+    }
+
+    void SetRadius(float r)
+    {
+        transform.localScale = new Vector3(r, r, 1);
     }
 
     void Update()
     {
         _acc = Vector3.zero;
 
-        ApplyForce(_gravity);
+        ApplyForce(_gravity * _mass);
 
         if(Input.GetKey(KeyCode.Mouse0))
         {
@@ -41,7 +48,8 @@ public class Particle : MonoBehaviour
 
     void ApplyForce(Vector3 force)
     {
-        _acc += force * Time.deltaTime;
+        Vector3 acc = force / _mass;
+        _acc += acc *Time.deltaTime;
     }
 
     void Edges()
