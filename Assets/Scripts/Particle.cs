@@ -7,7 +7,8 @@ public class Particle : MonoBehaviour
     [SerializeField] Vector3 _gravity = new Vector3(0, -9.8f, 0);
     [SerializeField] Vector3 _wind = new Vector3(1, 0, 0);
     [SerializeField] [Min(.1f)] float _mass = .1f;
-    [SerializeField] float _mu = .1f;
+    [SerializeField] float _mu = .1f; // friction factor of surfaces
+    [SerializeField] float _c = .1f; // drag factor
     float _bottomEdgeHeight;
     Vector3 _vel = Vector3.zero;
     Vector3 _acc = Vector3.zero;
@@ -38,13 +39,17 @@ public class Particle : MonoBehaviour
         {
             ApplyForce(_wind * -1);
         }
-
+        
         Edges();
 
         Friction();
 
-        _vel += _acc;
+        if(transform.position.y < 0)
+        {
+            Drag();
+        }
 
+        _vel += _acc;
 
         transform.position += _vel * Time.deltaTime;;
     }
@@ -96,8 +101,6 @@ public class Particle : MonoBehaviour
     {
         float height = transform.position.y;
         float bottom = -Camera.main.orthographicSize;
-        float margin = .1f;
-        
 
         Vector3 friction = _vel;
         friction = friction.normalized;
@@ -106,11 +109,18 @@ public class Particle : MonoBehaviour
         friction *= _mass;
 
         ApplyForce(friction);
+    }
 
+    void Drag()
+    {
+        Vector3 drag = _vel;
+        drag.Normalize();
+        drag *= -1;
 
-        if(height < bottom + margin)
-        {
-            Debug.Log($"friction");
-        }
+        float speed = _vel.magnitude;
+
+        drag *= speed * speed * _c;
+
+        ApplyForce(drag);
     }
 }
