@@ -4,40 +4,46 @@ using UnityEngine;
 
 public class Particle : MonoBehaviour
 {
-    public float _mass = 1;
-
+    [SerializeField] float _mass = 1;
     [SerializeField] Vector3 _vel = new Vector2(1,1);
     [SerializeField] float _velLimit = 1;
-    [SerializeField] Attractor _attractor;
 
+    [SerializeField] float _gConstant = 1;
+    [SerializeField] float _disMax, _disMin;
     Vector3 _acc = Vector3.zero; 
 
     void Start()
     {
-        _velLimit = Random.Range(5, 15);
-        Time.timeScale = 10;
         _vel = Random.insideUnitCircle * _velLimit;
-        //GetComponentInChildren<TrailRenderer>().material.color = Random.ColorHSV();
     }
 
-
-    void Update()
+    void OnTriggerStay2D(Collider2D other)
     {
         _acc = Vector3.zero;
 
-        float attraction = _attractor.Attract(this);
+        Particle otherBody = other.GetComponent<Particle>();
 
-        Vector3 dir = (_attractor.transform.position - transform.position).normalized;
+        float attraction = Attract(otherBody);
 
-        ApplyForce(dir * attraction);
-        
+        Vector3 dir = otherBody.transform.position - transform.position;
+        Vector3 gravitationalForce = dir.normalized * attraction * Time.deltaTime;
+        ApplyForce(gravitationalForce);
+
         _vel += _acc;
 
         _vel = Vector3.ClampMagnitude(_vel, _velLimit);
 
-        //Debug.DrawRay(transform.position, _vel);
-
         transform.position += _vel * Time.deltaTime; 
+    }
+
+    public float Attract(Particle particle)
+    {
+        float d = Vector3.Distance(particle.transform.position, transform.position);
+
+        d = Mathf.Clamp(d, _disMin, _disMax);
+
+        float attraction = (_mass * particle._mass) / (d * d) * _gConstant;
+        return attraction;
     }
 
     void ApplyForce(Vector3 force)
