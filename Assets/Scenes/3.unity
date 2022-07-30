@@ -237,6 +237,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b2b53fce3296c48fe92103e29ccdda83, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _angle: 0
+  _angleVel: 0
+  _angleAcc: 0
 --- !u!212 &1307466393
 SpriteRenderer:
   m_ObjectHideFlags: 0
